@@ -113,10 +113,7 @@ resource "azurerm_postgresql_flexible_server" "postgres_database" {
   storage_mb   = 32768 //32Gbs
   storage_tier = "P4"
 
-  sku_name   = "B_Standard_B1ms"
-  high_availability { //to save some money
-    mode = "Disabled"
-  }
+  sku_name = "B_Standard_B1ms"
   depends_on = [azurerm_private_dns_zone_virtual_network_link.dns_zone_link]
 
 }
