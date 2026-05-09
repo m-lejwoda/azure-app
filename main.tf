@@ -1,17 +1,17 @@
 resource "azurerm_resource_group" "main_rgp" {
-  name     = "main_rgp"
+  name     = "main-rgp"
   location = "West Europe"
 }
 
 resource "azurerm_virtual_network" "main_vnet" {
-  name                = "main_vnet"
+  name                = "main-vnet"
   location            = azurerm_resource_group.main_rgp.location
   resource_group_name = azurerm_resource_group.main_rgp.name
   address_space       = ["10.0.0.0/16"]
 }
 
 resource "azurerm_subnet" "backend_subnet" {
-  name                 = "backend_subnet"
+  name                 = "backend-subnet"
   resource_group_name  = azurerm_resource_group.main_rgp.name
   virtual_network_name = azurerm_virtual_network.main_vnet.name
   address_prefixes     = ["10.0.1.0/24"]
@@ -25,7 +25,7 @@ resource "azurerm_subnet" "backend_subnet" {
 }
 
 resource "azurerm_subnet" "storage_subnet" {
-  name                 = "storage_subnet"
+  name                 = "storage-subnet"
   resource_group_name  = azurerm_resource_group.main_rgp.name
   virtual_network_name = azurerm_virtual_network.main_vnet.name
   address_prefixes     = ["10.0.2.0/24"]
@@ -38,14 +38,14 @@ resource "azurerm_subnet" "storage_subnet" {
 }
 
 resource "azurerm_subnet" "public_subnet" {
-  name                 = "public_subnet"
+  name                 = "public-subnet"
   resource_group_name  = azurerm_resource_group.main_rgp.name
   virtual_network_name = azurerm_virtual_network.main_vnet.name
   address_prefixes     = ["10.0.3.0/24"]
 }
 
 resource "azurerm_service_plan" "fastapi_plan" {
-  name                = "fastapi_plan"
+  name                = "fastapi-plan"
   resource_group_name = azurerm_resource_group.main_rgp.name
   location            = azurerm_resource_group.main_rgp.location
   os_type             = "Linux"
@@ -53,10 +53,10 @@ resource "azurerm_service_plan" "fastapi_plan" {
 }
 
 resource "azurerm_linux_web_app" "prod_fastapi" {
-  name                = "prod_fastapi"
-  location            = azurerm_resource_group.main_rgp.location
-  resource_group_name = azurerm_resource_group.main_rgp.name
-  service_plan_id     = azurerm_service_plan.fastapi_plan.id
+  name                      = "prod-fastapi"
+  location                  = azurerm_resource_group.main_rgp.location
+  resource_group_name       = azurerm_resource_group.main_rgp.name
+  service_plan_id           = azurerm_service_plan.fastapi_plan.id
   virtual_network_subnet_id = azurerm_subnet.backend_subnet.id
 
   site_config {
@@ -72,8 +72,8 @@ resource "azurerm_linux_web_app" "prod_fastapi" {
 }
 
 resource "azurerm_linux_web_app_slot" "staging_fastapi" {
-  name           = "staging_fastapi"
-  app_service_id = azurerm_linux_web_app.prod_fastapi.id
+  name                      = "staging-fastapi"
+  app_service_id            = azurerm_linux_web_app.prod_fastapi.id
   virtual_network_subnet_id = azurerm_subnet.backend_subnet.id
   site_config {
     application_stack {
