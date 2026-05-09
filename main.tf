@@ -44,3 +44,29 @@ resource "azurerm_subnet" "public_subnet" {
   address_prefixes     = ["10.0.3.0/24"]
 }
 
+resource "azurerm_service_plan" "fastapi_plan" {
+  name                = "fastapi_plan"
+  resource_group_name = azurerm_resource_group.main_rgp.name
+  location            = azurerm_resource_group.main_rgp.location
+  os_type             = "Linux"
+  sku_name            = "B1"
+}
+
+resource "azurerm_linux_web_app" "fastapi" {
+  name                = "fastapi"
+  location            = azurerm_resource_group.main_rgp.location
+  resource_group_name = azurerm_resource_group.main_rgp.name
+  service_plan_id     = azurerm_service_plan.fastapi_plan.id
+  site_config {
+    application_stack {
+      python_version = "3.13"
+    }
+    app_command_line       = "uvicorn main:app --host 0.0.0.0 --port 8000"
+    vnet_route_all_enabled = true
+    http2_enabled          = true
+    always_on              = true
+  }
+
+}
+
+
