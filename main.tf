@@ -52,11 +52,29 @@ resource "azurerm_service_plan" "fastapi_plan" {
   sku_name            = "B1"
 }
 
-resource "azurerm_linux_web_app" "fastapi" {
-  name                = "fastapi"
+resource "azurerm_linux_web_app" "prod_fastapi" {
+  name                = "prod_fastapi"
   location            = azurerm_resource_group.main_rgp.location
   resource_group_name = azurerm_resource_group.main_rgp.name
   service_plan_id     = azurerm_service_plan.fastapi_plan.id
+  virtual_network_subnet_id = azurerm_subnet.backend_subnet.id
+
+  site_config {
+    application_stack {
+      python_version = "3.13"
+    }
+
+    app_command_line       = "uvicorn main:app --host 0.0.0.0 --port 8000"
+    vnet_route_all_enabled = true
+    http2_enabled          = true
+    always_on              = true
+  }
+}
+
+resource "azurerm_linux_web_app_slot" "staging_fastapi" {
+  name           = "staging_fastapi"
+  app_service_id = azurerm_linux_web_app.prod_fastapi.id
+  virtual_network_subnet_id = azurerm_subnet.backend_subnet.id
   site_config {
     application_stack {
       python_version = "3.13"
@@ -66,7 +84,5 @@ resource "azurerm_linux_web_app" "fastapi" {
     http2_enabled          = true
     always_on              = true
   }
-
 }
-
 
