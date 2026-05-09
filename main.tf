@@ -69,6 +69,9 @@ resource "azurerm_linux_web_app" "prod_fastapi" {
     http2_enabled          = true
     always_on              = true
   }
+  app_settings = {
+    "DATABASE_URL" = "postgresql://psqladmin:H@Sh1CoR3!@${azurerm_postgresql_flexible_server.postgres_database.fqdn}:5432/app_prod"
+  }
 }
 
 resource "azurerm_linux_web_app_slot" "staging_fastapi" {
@@ -83,6 +86,9 @@ resource "azurerm_linux_web_app_slot" "staging_fastapi" {
     vnet_route_all_enabled = true
     http2_enabled          = true
     always_on              = true
+  }
+  app_settings = {
+    "DATABASE_URL" = "postgresql://psqladmin:H@Sh1CoR3!@${azurerm_postgresql_flexible_server.postgres_database.fqdn}:5432/app_stage"
   }
 }
 
