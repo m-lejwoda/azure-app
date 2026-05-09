@@ -86,3 +86,40 @@ resource "azurerm_linux_web_app_slot" "staging_fastapi" {
   }
 }
 
+resource "azurerm_private_dns_zone" "postgres_dns" {
+  name                = "azure-project.postgres.database.azure.com"
+  resource_group_name = azurerm_resource_group.main_rgp.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "dns_zone_link" {
+  name                  = "dns-zone-link"
+  private_dns_zone_name = azurerm_private_dns_zone.postgres_dns.name
+  virtual_network_id    = azurerm_virtual_network.main_vnet.id
+  resource_group_name   = azurerm_resource_group.main_rgp.name
+}
+
+resource "azurerm_postgresql_flexible_server" "postgres_database" {
+  name                          = "postgres-database"
+  resource_group_name           = azurerm_resource_group.main_rgp.name
+  location                      = azurerm_resource_group.main_rgp.location
+  version                       = "16"
+  delegated_subnet_id           = azurerm_subnet.storage_subnet.id
+  private_dns_zone_id           = azurerm_private_dns_zone.postgres_dns.id
+  public_network_access_enabled = false
+  administrator_login           = "psqladmin"
+  administrator_password        = "H@Sh1CoR3!"
+  zone                          = "1"
+
+  storage_mb   = 32768 //32Gbs
+  storage_tier = "P4"
+
+  sku_name   = "B_Standard_B1ms"
+  high_availability { //to save some money
+    mode = "Disabled"
+  }
+  depends_on = [azurerm_private_dns_zone_virtual_network_link.dns_zone_link]
+
+}
+
+
+
